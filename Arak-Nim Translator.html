@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arak-Nim Translator v3.1</title>
+    <style>
+        /*                                    */
+        /*                                    */
+        /* ARAK-NIM TRANSLATOR CODE           */
+        /* MADE BY SINVRH - 2026              */
+        /* FOR THE JADNIX COSMOS / CODEX      */
+        /* I don't know what else to put here */
+        /*                                    */
+        /*                                    */
+
+        /* CSS RESET & VARIABLES */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-color: #0a0a0c;
+            --panel-bg: #121216;
+            --border-color: #22222a;
+            --text-color: #e1e1e6;
+            --text-muted: #7c7c8a;
+            
+            /* Dynamic Accent Glow */
+            --accent-glow: #ff5e00;
+            --accent-dim: rgba(255, 94, 0, 0.15);
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            grid-template-rows: 1fr;
+            overflow: hidden;
+            transition: background var(--transition-speed);
+        }
+
+        /* SIDEBAR: REFERENCE CODEX */
+        .sidebar {
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 1.2rem;
+            color: var(--accent-glow);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 2px solid var(--accent-dim);
+            padding-bottom: 8px;
+            transition: color var(--transition-speed);
+        }
+
+        .codex-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .codex-title {
+            font-weight: bold;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 4px;
+        }
+
+        .codex-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.8rem;
+        }
+
+        .codex-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 4px;
+        }
+
+        .codex-key {
+            color: var(--accent-glow);
+            font-weight: bold;
+            transition: color var(--transition-speed);
+        }
+
+        .codex-val {
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        /* MAIN TRANSLATOR PANEL */
+        .main-panel {
+            display: grid;
+            grid-template-rows: auto 1fr 280px;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* MAIN HEADER */
+        .header {
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-title-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header h1 {
+            font-size: 1.3rem;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--accent-dim);
+        }
+
+        /* DIRECTION SWAP BUTTON */
+        .direction-swap-btn {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--accent-glow);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all var(--transition-speed);
+        }
+
+        .direction-swap-btn:hover {
+            box-shadow: 0 0 10px var(--accent-dim);
+            border-color: var(--accent-glow);
+        }
+
+        /* REGISTERS TOGGLE */
+        .toggle-container {
+            display: flex;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 16px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 6px;
+            text-transform: uppercase;
+            transition: all var(--transition-speed);
+        }
+
+        .toggle-btn.active {
+            color: var(--bg-color);
+            background-color: var(--accent-glow);
+            box-shadow: 0 0 15px var(--accent-dim);
+        }
+
+        /* TRANSLATION BOXES CONTAINER */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background-color: var(--border-color);
+            padding: 0;
+        }
+
+        .box {
+            background-color: var(--bg-color);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .box label {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        .box textarea {
+            width: 100%;
+            height: 100%;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+        }
+
+        /* FIXED SCROLLABILITY FOR OUTPUT DISPLAY */
+        .output-display {
+            font-size: 1.2rem;
+            color: var(--accent-glow);
+            font-weight: bold;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            height: 100%;
+            text-shadow: 0 0 5px var(--accent-dim);
+            transition: color var(--transition-speed);
+            overflow-y: auto;
+            max-height: 380px; /* Locked height boundary to enforce scrollability */
+            padding-right: 10px;
+        }
+
+        /* Scrollbar aesthetics */
+        .output-display::-webkit-scrollbar, .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .output-display::-webkit-scrollbar-thumb, .sidebar::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 3px;
+        }
+
+        /* EXPLANATION / COMPILER LOG PANEL */
+        .console-panel {
+            background-color: var(--panel-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 24px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+        }
+
+        .console-header {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .console-log {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .log-success { color: #50fa7b; }
+        .log-info { color: #8be9fd; }
+        .log-warn { color: #f1fa8c; }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR: REFERENCE -->
+    <div class="sidebar">
+        <h2>Arak-Nim Codex</h2>
+        
+        <!-- 1. CLASS SUFFIXES -->
+        <div class="codex-section">
+            <div class="codex-title">Class Suffixes</div>
+            <ul class="codex-list">
+                <li class="codex-item"><span class="codex-key" id="lbl-noun-suffix">-ak</span><span class="codex-val">Noun Maker</span></li>
+                <li class="codex-item"><span class="codex-key" id="lbl-verb-suffix">-umu</span><span class="codex-val">Verb Maker</span></li>
+                <li class="codex-item"><span class="codex-key">-i</span><span class="codex-val">Adjective Maker</span></li>
+                <li class="codex-item"><span class="codex-key">-o</span><span class="codex-val">Adverb Maker</span></li>
+            </ul>
+        </div>
+
+        <!-- 2. PRONOUNS -->
+        <div class="codex-section">
+            <div class="codex-title">Pronouns</div>
+            <ul class="codex-list">
+                <li class="codex-item"><span class="codex-key">Hon</span><span class="codex-val">I / Me</span></li>
+                <li class="codex-item"><span class="codex-key">Vi</span><span class="codex-val">You</span></li>
+                <li class="codex-item"><span class="codex-key">Ar</span><span class="codex-val">He / She / It</span></li>
+                <li class="codex-item"><span class="codex-key">Honis</span><span class="codex-val">We (Me-agents)</span></li>
+                <li class="codex-item"><span class="codex-key">Viis</span><span class="codex-val">You All</span></li>
+                <li class="codex-item"><span class="codex-key">Aris</span><span class="codex-val">They / Them</span></li>
+            </ul>
+        </div>
+
+        <!-- 3. LINKERS -->
+        <div class="codex-section">
+            <div class="codex-title">Linkers</div>
+            <ul class="codex-list">
+                <li class="codex-item"><span class="codex-key">ni</span><span class="codex-val">is / am / are (Copula)</span></li>
+                <li class="codex-item"><span class="codex-key">no</span><span class="codex-val">of / for / if (Linker)</span></li>
+                <li class="codex-item"><span class="codex-key">cu</span><span class="codex-val">with / but (Contrast)</span></li>
+                <li class="codex-item"><span class="codex-key">hi</span><span class="codex-val">and / coordinating</span></li>
+                <li class="codex-item"><span class="codex-key">no</span><span class="codex-val">not / negation</span></li>
+            </ul>
+        </div>
+
+        <!-- 4. ROOTS -->
+        <div class="codex-section">
+            <div class="codex-title">Core Roots</div>
+            <ul class="codex-list">
+                <li class="codex-item"><span class="codex-key">Fye</span><span class="codex-val">Track / Find / See</span></li>
+                <li class="codex-item"><span class="codex-key">Hij</span><span class="codex-val">Cut / End / Execute</span></li>
+                <li class="codex-item"><span class="codex-key">Cuv</span><span class="codex-val">Bind / Contain / Keep</span></li>
+                <li class="codex-item"><span class="codex-key">Vor</span><span class="codex-val">Change / Anomaly / Turn</span></li>
+                <li class="codex-item"><span class="codex-key">Nim</span><span class="codex-val">Rule / Law / Leader</span></li>
+                <li class="codex-item"><span class="codex-key">Ist</span><span class="codex-val">Exist / Here / Identity</span></li>
+                <li class="codex-item"><span class="codex-key">Non</span><span class="codex-val">Void / Silence / Air</span></li>
+                <li class="codex-item"><span class="codex-key">Muv</span><span class="codex-val">Sound / Motion / Speak</span></li>
+                <li class="codex-item"><span class="codex-key">Roz</span><span class="codex-val">Space / Zone / Place</span></li>
+                <li class="codex-item"><span class="codex-key">Tor</span><span class="codex-val">Core / Vessel / Body</span></li>
+                <li class="codex-item"><span class="codex-key">Zon</span><span class="codex-val">Light / Spark / Glow</span></li>
+                <li class="codex-item"><span class="codex-key">Kar</span><span class="codex-val">Shadow / Dark / Sin</span></li>
+                <li class="codex-item"><span class="codex-key">Vre</span><span class="codex-val">War / Might / Force</span></li>
+                <li class="codex-item"><span class="codex-key">Suj</span><span class="codex-val">Devotion / Thanks</span></li>
+                <li class="codex-item"><span class="codex-key">Tan</span><span class="codex-val">Time / Cycle / Future</span></li>
+                <li class="codex-item"><span class="codex-key">Men</span><span class="codex-val">Mind / Will / Thought</span></li>
+                <li class="codex-item"><span class="codex-key">Zuv</span><span class="codex-val">Hand / Build / Help</span></li>
+                <li class="codex-item"><span class="codex-key">Pire</span><span class="codex-val">Wall / Shield / Block</span></li>
+                <li class="codex-item"><span class="codex-key">Lir</span><span class="codex-val">Flow / Water / Deep</span></li>
+                <li class="codex-item"><span class="codex-key">Arak</span><span class="codex-val">Anomaly / Offspring</span></li>
+                <li class="codex-item" style="border: none; justify-content: center; color: var(--text-muted); font-style: italic; padding-top: 8px;">...and 320+ concepts in backend</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- MAIN TRANSLATOR PANEL -->
+    <div class="main-panel">
+        
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-title-container">
+                <h1 id="app-title">Arak-Nim Translator v3.1</h1>
+                <button class="direction-swap-btn" id="direction-btn" onclick="swapDirection()">English ⇄ Arak-Nim</button>
+            </div>
+            <div class="toggle-container">
+                <button class="toggle-btn active" id="btn-vryeich" onclick="setDialect('vryeich')">Vryeich</button>
+                <button class="toggle-btn" id="btn-tsuzeri" onclick="setDialect('tsuzeri')">Tsuzeri</button>
+            </div>
+        </div>
+
+        <!-- WORKSPACE -->
+        <div class="workspace">
+            <div class="box">
+                <label id="lbl-input-box">English Input</label>
+                <textarea id="english-input" placeholder="Type or paste here to translate..." oninput="processInput()"></textarea>
+            </div>
+            <div class="box" style="border-left: 1px solid var(--border-color);">
+                <label id="lbl-output-box">Arak-Nim Output</label>
+                <div class="output-display" id="output-display">...</div>
+            </div>
+        </div>
+
+        <!-- EXPLANATION LOG -->
+        <div class="console-panel">
+            <div class="console-header">Grammar Log</div>
+            <div class="console-log" id="console-log">[Arak-Nim Parser Working] Waiting...</div>
+        </div>
+
+    </div>
+
+    <!-- TRANSLATOR LOGIC -->
+    <script>
+        let currentDialect = 'vryeich';
+        let translationMode = 'forward'; // 'forward' = Eng->Arak, 'reverse' = Arak->Eng
+
+        // THE MASSIVE EXPANDED DICTIONARY (LEXICON 3.3 - 320+ MAPPINGS)
+        const roots = {
+            // Fye (Track/Find/See)
+            'track': 'fye', 'find': 'fye', 'see': 'fye', 'seen': 'fye', 'detect': 'fye', 'hunt': 'fye', 'observe': 'fye', 'look': 'fye', 'search': 'fye', 'scan': 'fye', 'stare': 'fye', 'gaze': 'fye', 'watch': 'fye', 'discover': 'fye', 'reveal': 'fye', 'witness': 'fye', 'spy': 'fye', 'perceive': 'fye', 'notice': 'fye', 'inspect': 'fye', 'explore': 'fye', 'examine': 'fye', 'view': 'fye', 'sight': 'fye', 'sights': 'fye', 'eyes': 'fye', 'eye': 'fye', 'vision': 'fye', 'mirror': 'fye',
+            // Hij (Cut/End/Execute)
+            'cut': 'hij', 'strike': 'hij', 'end': 'hij', 'execute': 'hij', 'destroy': 'hij', 'kill': 'hij', 'slash': 'hij', 'stop': 'hij', 'grind': 'hij', 'grinding': 'hij', 'paste': 'hij', 'sever': 'hij', 'tear': 'hij', 'shatter': 'hij', 'break': 'hij', 'broken': 'hij', 'pierce': 'hij', 'wound': 'hij', 'defeat': 'hij', 'die': 'hij', 'death': 'hij', 'doom': 'hij', 'doomed': 'hij', 'past': 'hij', 'debris': 'hij', 'crush': 'hij', 'crushed': 'hij', 'crash': 'hij', 'smash': 'hij', 'split': 'hij', 'snap': 'hij', 'delete': 'hij', 'deleted': 'hij', 'erase': 'hij', 'ruin': 'hij', 'ruined': 'hij', 'decay': 'hij', 'rot': 'hij', 'fell': 'hij', 'finish': 'hij', 'finished': 'hij', 'rendered': 'hij', 'cross': 'hij', 'crossed': 'hij',
+            // Cuv (Bind/Contain/Lock)
+            'bind': 'cuv', 'cover': 'cuv', 'contain': 'cuv', 'lock': 'cuv', 'love': 'cuv', 'prison': 'cuv', 'cage': 'cuv', 'attach': 'cuv', 'book': 'cuv', 'books': 'cuv', 'page': 'cuv', 'pages': 'cuv', 'archive': 'cuv', 'archives': 'cuv', 'embrace': 'cuv', 'keep': 'cuv', 'keeps': 'cuv', 'hold': 'cuv', 'save': 'cuv', 'guard': 'cuv', 'shelter': 'cuv', 'contract': 'cuv', 'treaty': 'cuv', 'bead': 'cuv', 'ring': 'cuv', 'custody': 'cuv', 'protect': 'cuv', 'safe': 'cuv', 'safety': 'cuv', 'jail': 'cuv', 'closed': 'cuv', 'closure': 'cuv', 'capture': 'cuv', 'captured': 'cuv', 'have': 'cuv', 'has': 'cuv', 'weave': 'cuv', 'dress': 'cuv', 'caught': 'cuv', 'clothing': 'cuv', 'wear': 'cuv',
+            // Vor (Change/Anomaly/Issue)
+            'change': 'vor', 'shift': 'vor', 'anomaly': 'vor', 'chaos': 'vor', 'issue': 'vor', 'problem': 'vor', 'trouble': 'vor', 'glitch': 'vor', 'turn': 'vor', 'turns': 'vor', 'turned': 'vor', 'mutate': 'vor', 'adapt': 'vor', 'evolve': 'vor', 'warp': 'vor', 'bend': 'vor', 'alter': 'vor', 'transform': 'vor', 'transformed': 'vor', 'transition': 'vor', 'adjust': 'vor', 'modify': 'vor', 'swap': 'vor', 'replace': 'vor', 'recast': 'vor', 'sloppy': 'vor', 'mess': 'vor', 'messy': 'vor',
+            // Nim (Rule/Law/Leader)
+            'rule': 'nim', 'law': 'nim', 'measure': 'nim', 'authority': 'nim', 'leader': 'nim', 'boss': 'nim', 'king': 'nim', 'sovereign': 'nim', 'autarch': 'nim', 'order': 'nim', 'queen': 'nim', 'prince': 'nim', 'sage': 'nim', 'sages': 'nim', 'plan': 'nim', 'decree': 'nim', 'command': 'nim', 'judge': 'nim', 'scale': 'nim', 'princess': 'nim', 'master': 'nim', 'lord': 'nim', 'ruler': 'nim', 'guide': 'nim', 'lead': 'nim', 'leads': 'nim', 'control': 'nim', 'tally': 'nim', 'record': 'nim', 'assessment': 'nim', 'worth': 'nim', 'value': 'nim', 'ritual': 'nim',
+            // Ist (Exist/Identity/Name)
+            'exist': 'ist', 'present': 'ist', 'here': 'ist', 'identity': 'ist', 'name': 'ist', 'names': 'ist', 'hello': 'ist', 'greet': 'ist', 'greetings': 'ist', 'born': 'ist', 'reborn': 'ist', 'live': 'ist', 'living': 'ist', 'life': 'ist', 'presence': 'ist', 'reality': 'ist', 'real': 'ist', 'true': 'ist', 'truth': 'ist', 'awaken': 'ist', 'arise': 'ist', 'rise': 'ist', 'actual': 'ist', 'physical': 'ist', 'entity': 'ist', 'essence': 'ist', 'gender': 'ist', 'stay': 'ist',
+            // Non (Void/Silence/Absent)
+            'void': 'non', 'silence': 'non', 'empty': 'non', 'nothing': 'non', 'gone': 'non', 'absent': 'non', 'quiet': 'non', 'air': 'non', 'sky': 'non', 'free': 'non', 'scattered': 'non', 'wind': 'non', 'breath': 'non', 'vapor': 'non', 'smoke': 'non', 'ghost': 'non', 'blank': 'non', 'hollow': 'non', 'vacuum': 'non', 'clear': 'non', 'vanished': 'non', 'unbound': 'non', 'off': 'non', 'out': 'non', 'lose': 'non', 'lost': 'non',
+            // Muv (Sound/Speak/Dance)
+            'sound': 'muv', 'vibration': 'muv', 'motion': 'muv', 'dance': 'muv', 'resonate': 'muv', 'speak': 'muv', 'say': 'muv', 'talk': 'muv', 'tell': 'muv', 'voice': 'muv', 'whisper': 'muv', 'whispers': 'muv', 'shout': 'muv', 'shouts': 'muv', 'scream': 'muv', 'screams': 'muv', 'wail': 'muv', 'wails': 'muv', 'screamed': 'muv', 'echo': 'muv', 'roar': 'muv', 'cry': 'muv', 'sing': 'muv', 'noise': 'muv', 'word': 'muv', 'words': 'muv', 'language': 'muv', 'says': 'muv', 'wailing': 'muv', 'music': 'muv', 'melody': 'muv', 'song': 'muv', 'rhythm': 'muv', 'ask': 'muv', 'question': 'muv', 'spin': 'muv',
+            // Roz (Space/Zone/Place)
+            'space': 'roz', 'zone': 'roz', 'place': 'roz', 'realm': 'roz', 'territory': 'roz', 'land': 'roz', 'room': 'roz', 'ground': 'roz', 'earth': 'roz', 'world': 'roz', 'universe': 'roz', 'cosmos': 'roz', 'expanse': 'roz', 'domain': 'roz', 'floor': 'roz', 'dirt': 'roz', 'soil': 'roz', 'stone': 'roz', 'rock': 'roz', 'basalt': 'roz', 'planet': 'roz', 'region': 'roz', 'sector': 'roz', 'coordinates': 'roz', 'vast': 'roz', 'way': 'roz', 'path': 'roz', 'direction': 'roz',
+            // Tor (Core/Vessel/Body)
+            'core': 'tor', 'body': 'tor', 'vessel': 'tor', 'form': 'tor', 'shell': 'tor', 'object': 'tor', 'thing': 'tor', 'spirit': 'tor', 'aura': 'tor', 'essence': 'tor', 'soul': 'tor', 'heart': 'tor', 'shape': 'tor', 'structure': 'tor', 'scale': 'tor', 'scales': 'tor', 'bone': 'tor', 'flesh': 'tor', 'muscle': 'tor', 'bead': 'tor', 'beadak': 'tor', 'material': 'tor',
+            // Zon (Light/Spark/Good)
+            'light': 'zon', 'spark': 'zon', 'star': 'zon', 'glow': 'zon', 'bright': 'zon', 'good': 'zon', 'pure': 'zon', 'well': 'zon', 'great': 'zon', 'clear': 'zon', 'day': 'zon', 'morn': 'zon', 'morning': 'zon', 'beacon': 'zon', 'prime': 'zon', 'gold': 'zon', 'sun': 'zon', 'fire': 'zon', 'heat': 'zon', 'warmth': 'zon', 'hope': 'zon', 'blessing': 'zon', 'white': 'zon', 'yellow': 'zon', 'shine': 'zon', 'shining': 'zon', 'holy': 'zon', 'above': 'zon', 'over': 'zon', 'dull': 'kar',
+            // Kar (Shadow/Dark/Bad)
+            'shadow': 'kar', 'dark': 'kar', 'mask': 'kar', 'hidden': 'kar', 'secret': 'kar', 'evil': 'kar', 'bad': 'kar', 'corrupt': 'kar', 'betrayal': 'kar', 'sin': 'kar', 'ruthless': 'kar', 'cold': 'kar', 'illusion': 'kar', 'illusions': 'kar', 'night': 'kar', 'merciless': 'kar', 'false': 'kar', 'lie': 'kar', 'deceit': 'kar', 'black': 'kar', 'grey': 'kar', 'gray': 'kar', 'curse': 'kar', 'pain': 'kar', 'suffering': 'kar', 'despair': 'kar', 'fear': 'kar', 'under': 'kar', 'below': 'kar',
+            // Vre (War/Conflict/Fight)
+            'war': 'vre', 'conflict': 'vre', 'clash': 'vre', 'fight': 'vre', 'combat': 'vre', 'enemy': 'vre', 'foe': 'vre', 'opponent': 'vre', 'power': 'vre', 'force': 'vre', 'might': 'vre', 'tempest': 'vre', 'rage': 'vre', 'warrior': 'vre', 'vigor': 'vre', 'increase': 'vre', 'grows': 'vre', 'rising': 'vre', 'defy': 'vre', 'aggression': 'vre', 'angry': 'vre', 'wrath': 'vre', 'storm': 'vre', 'thunder': 'vre', 'weapon': 'vre', 'blade': 'vre', 'potent': 'vre', 'mighty': 'vre', 'struggled': 'vre', 'strengthens': 'vre', 'can': 'vre', 'could': 'vre', 'able': 'vre',
+            // Suj (Devotion/Connection/Thanks)
+            'devotion': 'suj', 'connection': 'suj', 'affinity': 'suj', 'thanks': 'suj', 'thank': 'suj', 'gratitude': 'suj', 'friend': 'suj', 'ally': 'suj', 'redemption': 'suj', 'blessing': 'suj', 'peace': 'suj', 'faithful': 'suj', 'trust': 'suj', 'bond': 'suj', 'loyalty': 'suj', 'worship': 'suj', 'holy': 'suj', 'sacred': 'suj', 'devoted': 'suj', 'bow': 'suj',
+            // Tan (Time/Cycle/History)
+            'time': 'tan', 'cycle': 'tan', 'point': 'tan', 'history': 'tan', 'age': 'tan', 'era': 'tan', 'moment': 'tan', 'future': 'tan', 'eternity': 'tan', 'span': 'tan', 'duration': 'tan', 'infinite': 'tan', 'always': 'tan', 'forever': 'tan', 'clock': 'tan', 'year': 'tan', 'ancient': 'tan', 'long': 'tan',
+            // Men (Mind/Will/Thought)
+            'mind': 'men', 'will': 'men', 'thought': 'men', 'memory': 'men', 'concept': 'men', 'idea': 'men', 'think': 'men', 'know': 'men', 'remember': 'men', 'function': 'men', 'purpose': 'men', 'wish': 'men', 'wishes': 'men', 'dream': 'men', 'dreams': 'men', 'promise': 'men', 'vision': 'men', 'wisdom': 'men', 'lesson': 'men', 'knowledge': 'men', 'learn': 'men', 'study': 'men', 'understand': 'men', 'logic': 'men',
+            // Zuv (Hand/Build/Help)
+            'hand': 'zuv', 'craft': 'zuv', 'build': 'zuv', 'make': 'zuv', 'help': 'zuv', 'aid': 'zuv', 'assist': 'zuv', 'create': 'zuv', 'seed': 'zuv', 'seeds': 'zuv', 'harvest': 'zuv', 'deed': 'zuv', 'work': 'zuv', 'labor': 'zuv', 'construct': 'zuv', 'forge': 'zuv', 'delivered': 'zuv', 'write': 'zuv', 'rewrote': 'zuv', 'rewrite': 'zuv', 'arm': 'zuv', 'arms': 'zuv',
+            // Pire (Wall/Shield/Barrier)
+            'wall': 'pire', 'shield': 'pire', 'block': 'pire', 'barrier': 'pire', 'gate': 'pire', 'door': 'pire', 'defense': 'pire', 'fortress': 'pire', 'tower': 'pire', 'armor': 'pire',
+            // Lir (Flow/Water/Adapt)
+            'flow': 'lir', 'water': 'lir', 'liquid': 'lir', 'adapt': 'lir', 'run': 'lir', 'stream': 'lir', 'sea': 'lir', 'depth': 'lir', 'depths': 'lir', 'deep': 'lir', 'ocean': 'lir', 'river': 'lir', 'wave': 'lir', 'tide': 'lir', 'vein': 'lir', 'veins': 'lir', 'blood': 'lir', 'sap': 'lir', 'rain': 'lir',
+            // Arak (Abomination/Offspring)
+            'abomination': 'arak', 'offspring': 'arak', 'child': 'arak', 'spawn': 'arak', 'monster': 'arak', 'beast': 'arak', 'aberration': 'arak', 'intruder': 'arak', 'target': 'arak', 'threat': 'arak', 'djinn': 'arak', 'genie': 'arak'
+        };
+
+        const pronouns = {
+            'i': 'hon', 'me': 'hon',
+            'you': 'vi',
+            'he': 'ar', 'she': 'ar', 'it': 'ar',
+            'we': 'honis',
+            'y\'all': 'viis', 'yall': 'viis', 'you all': 'viis',
+            'they': 'aris', 'them': 'aris'
+        };
+
+        const staticParticles = {
+            'is': 'ni', 'am': 'ni', 'are': 'ni', 'be': 'ni',
+            'not': 'no', 'dont': 'no', 'dont': 'no',
+            'with': 'cu', 'but': 'cu',
+            'and': 'hi',
+            'for': 'no', 'of': 'no',
+            'this': 'isti',
+            'what': 'cu', 'why': 'hi', 'how': 'hi'
+        };
+
+        // Possessive mapping setup
+        const possessives = {
+            'my': 'hon',
+            'your': 'vi',
+            'his': 'ar', 'her': 'ar', 'its': 'ar',
+            'our': 'honis',
+            'their': 'aris'
+        };
+
+        // CONTEXTUAL REVERSE TRANSLATION MATRIX (dramatically upgrades reverse translation accuracy)
+        const reverseMatrix = {
+            'fye': { verb: 'see', noun: 'eyes' },
+            'hij': { verb: 'cut', noun: 'death' },
+            'cuv': { verb: 'have', noun: 'dress' },
+            'vor': { verb: 'change', noun: 'chaos' },
+            'nim': { verb: 'rule', noun: 'leader' },
+            'ist': { verb: 'exist', noun: 'identity' },
+            'non': { verb: 'empty', noun: 'void' },
+            'muv': { verb: 'speak', noun: 'sound' },
+            'roz': { verb: 'place', noun: 'realm' },
+            'tor': { verb: 'shape', noun: 'vessel' },
+            'zon': { verb: 'glow', noun: 'light' },
+            'kar': { verb: 'fear', noun: 'shadow' },
+            'vre': { verb: 'fight', noun: 'might' },
+            'suj': { verb: 'connect', noun: 'thanks' },
+            'tan': { verb: 'age', noun: 'time' },
+            'men': { verb: 'think', noun: 'mind' },
+            'zuv': { verb: 'make', noun: 'hand' },
+            'pire': { verb: 'shield', noun: 'wall' },
+            'lir': { verb: 'flow', noun: 'water' },
+            'arak': { verb: 'threaten', noun: 'anomaly' }
+        };
+
+        const pronounsInverse = {};
+        Object.keys(pronouns).forEach(key => {
+            pronounsInverse[pronouns[key]] = key;
+        });
+
+        const particlesInverse = {
+            'ni': 'is',
+            'no': 'of',
+            'cu': 'with',
+            'hi': 'and',
+            'isti': 'this'
+        };
+
+        // SWAP MODE: Swapping direction now keeps your place and feeds the translation
+        function swapDirection() {
+            const inputArea = document.getElementById('english-input');
+            const outputArea = document.getElementById('output-display');
+            const currentOutput = outputArea.innerText;
+
+            translationMode = (translationMode === 'forward') ? 'reverse' : 'forward';
+            const dirBtn = document.getElementById('direction-btn');
+            const lblInput = document.getElementById('lbl-input-box');
+            const lblOutput = document.getElementById('lbl-output-box');
+
+            if (translationMode === 'forward') {
+                dirBtn.innerText = "English ⇄ Arak-Nim";
+                lblInput.innerText = "English Input";
+                lblOutput.innerText = "Arak-Nim Output";
+                inputArea.placeholder = "Type or paste English here...";
+            } else {
+                dirBtn.innerText = "Arak-Nim ⇄ English";
+                lblInput.innerText = "Arak-Nim Input";
+                lblOutput.innerText = "English Output";
+                inputArea.placeholder = "Type or paste Arak-Nim here...";
+            }
+
+            // Feed the translation of the previous state into the input of the next
+            if (currentOutput && currentOutput !== '...') {
+                inputArea.value = currentOutput;
+            }
+
+            processInput();
+        }
+
+        // DIALECT SHIFTER: Vryeich vs. Tsuzeri UI and Codex Updates
+        function setDialect(dialect) {
+            currentDialect = dialect;
+            const root = document.documentElement;
+            
+            document.getElementById('btn-vryeich').classList.remove('active');
+            document.getElementById('btn-tsuzeri').classList.remove('active');
+            
+            if (dialect === 'vryeich') {
+                document.getElementById('btn-vryeich').classList.add('active');
+                root.style.setProperty('--accent-glow', '#ff5e00');
+                root.style.setProperty('--accent-dim', 'rgba(255, 94, 0, 0.15)');
+                // Update Sidebar labels to Vryeich
+                document.getElementById('lbl-noun-suffix').innerText = '-ak';
+                document.getElementById('lbl-verb-suffix').innerText = '-umu';
+            } else {
+                document.getElementById('btn-tsuzeri').classList.add('active');
+                root.style.setProperty('--accent-glow', '#b55fe6');
+                root.style.setProperty('--accent-dim', 'rgba(181, 95, 230, 0.15)');
+                // Update Sidebar labels to Tsuzeri
+                document.getElementById('lbl-noun-suffix').innerText = '-ai';
+                document.getElementById('lbl-verb-suffix').innerText = '-emi';
+            }
+            processInput();
+        }
+
+        function isConsonant(char) {
+            if (!char) return false;
+            return !['a', 'i', 'o', 'u', 'e'].includes(char.toLowerCase());
+        }
+
+        function isProperNoun(word, index) {
+            if (!word) return false;
+            if (word === 'I') return false;
+            const firstLetter = word.charAt(0);
+            const isCapital = firstLetter === firstLetter.toUpperCase() && firstLetter !== firstLetter.toLowerCase();
+            return isCapital && index > 0;
+        }
+
+        // LEMMA STRIPPER
+        function getLemma(word) {
+            let lemma = word.toLowerCase();
+            if (lemma === 'greetings') return 'greet';
+            if (lemma === 'things' || lemma === 'kings') return lemma;
+            if (lemma.endsWith('ies') && lemma.length > 4) return lemma.slice(0, -3) + 'y';
+            
+            if (lemma.endsWith('es') && lemma.length > 4) {
+                let test = lemma.slice(0, -2);
+                if (roots[test]) return test;
+                test = lemma.slice(0, -1);
+                if (roots[test]) return test;
+                if (lemma === 'wishes') return 'wish';
+                if (lemma === 'pages') return 'page';
+                if (lemma === 'sages') return 'sage';
+            }
+            if (lemma.endsWith('s') && !lemma.endsWith('ss') && lemma.length > 3) {
+                let test = lemma.slice(0, -1);
+                if (roots[test]) return test;
+            }
+            if (lemma.endsWith('ing') && lemma.length > 5) {
+                let test = lemma.slice(0, -3);
+                if (roots[test]) return test;
+                test = lemma.slice(0, -3) + 'e';
+                if (roots[test]) return test;
+            }
+            if (lemma.endsWith('ed') && lemma.length > 4) {
+                let test = lemma.slice(0, -2);
+                if (roots[test]) return test;
+                test = lemma.slice(0, -1);
+                if (roots[test]) return test;
+            }
+            return lemma;
+        }
+
+        // HEURISTIC SEMANTIC FALLBACK CLASSIFIER
+        function getSemanticFallback(lemma, isVerbTarget) {
+            if (lemma.includes('light') || lemma.includes('shine') || lemma.includes('glow') || lemma.includes('sun') || lemma.includes('fire') || lemma.includes('day') || lemma.includes('magic')) return 'zon';
+            if (lemma.includes('dark') || lemma.includes('shadow') || lemma.includes('night') || lemma.includes('blind') || lemma.includes('hide') || lemma.includes('mask') || lemma.includes('fear') || lemma.includes('scare')) return 'kar';
+            if (lemma.includes('water') || lemma.includes('sea') || lemma.includes('ocean') || lemma.includes('flow') || lemma.includes('wet') || lemma.includes('river') || lemma.includes('stream') || lemma.includes('pour')) return 'lir';
+            if (lemma.includes('mind') || lemma.includes('think') || lemma.includes('thought') || lemma.includes('brain') || lemma.includes('know') || lemma.includes('learn') || lemma.includes('study')) return 'men';
+            if (lemma.includes('fight') || lemma.includes('war') || lemma.includes('battle') || lemma.includes('clash') || lemma.includes('kill') || lemma.includes('die') || lemma.includes('rage') || lemma.includes('strike')) return 'vre';
+            if (lemma.includes('make') || lemma.includes('build') || lemma.includes('hand') || lemma.includes('work') || lemma.includes('craft') || lemma.includes('labor')) return 'zuv';
+            if (lemma.includes('move') || lemma.includes('run') || lemma.includes('walk') || lemma.includes('dance') || lemma.includes('spin') || lemma.includes('vibrate') || lemma.includes('motion')) return 'muv';
+
+            if (lemma.endsWith('ly')) return 'zon';
+            if (lemma.endsWith('ous') || lemma.endsWith('ive') || lemma.endsWith('ful') || lemma.endsWith('able') || lemma.endsWith('ible') || lemma.endsWith('al') || lemma.endsWith('ic') || lemma.endsWith('ish') || lemma.endsWith('y')) return 'zon';
+            if (lemma.endsWith('ate') || lemma.endsWith('ify') || lemma.endsWith('ise') || lemma.endsWith('ize') || lemma.endsWith('ing') || isVerbTarget) return 'zuv';
+
+            return 'tor'; // Default to Core/Vessel
+        }
+
+        // MAIN GATEWAY FUNCTION
+        function processInput() {
+            if (translationMode === 'forward') {
+                translateParagraph();
+            } else {
+                translateReverse();
+            }
+        }
+
+        // PIPELINE 1: ENGLISH -> ARAK-NIM (FORWARD)
+        function translateParagraph() {
+            const rawInput = document.getElementById('english-input').value.trim();
+            const outputDisplay = document.getElementById('output-display');
+            const logConsole = document.getElementById('console-log');
+
+            if (!rawInput) {
+                outputDisplay.innerText = '...';
+                logConsole.innerHTML = '[Arak-Nim Parser Active] Waiting for input...';
+                return;
+            }
+
+            let log = `[Arak-Nim Forward Parser v3.1]\n`;
+            log += `> Mode: ${currentDialect.toUpperCase()} active\n`;
+            log += `> Commencing parsing structures...\n\n`;
+
+            const sentences = rawInput.match(/[^.!?\n]+[.!?\n]*/g) || [rawInput];
+            let translatedSentences = [];
+
+            sentences.forEach((sentenceStr, sIdx) => {
+                let sTrim = sentenceStr.trim();
+                if (!sTrim) {
+                    translatedSentences.push("");
+                    return;
+                }
+
+                log += `--- Sentence [${sIdx + 1}]: "${sTrim}" ---\n`;
+
+                let tenseMarker = '';
+                let tempWords = sTrim.replace(/[.,\/#!\?$\%\^&\*;:{}=\-_`~()]/g, "").split(/\s+/);
+                
+                if (tempWords.map(w => w.toLowerCase()).includes('will')) {
+                    tenseMarker = 'Ro';
+                    log += `  + Tense: Future ("will") mapped.\n`;
+                } else if (tempWords.map(w => w.toLowerCase()).some(w => w.endsWith('ed') || ['did', 'was', 'were', 'had', 'saw', 'bound', 'struck', 'rewrote', 'crossed', 'crushed'].includes(w))) {
+                    tenseMarker = 'Ka';
+                    log += `  + Tense: Past mapped.\n`;
+                }
+
+                let tokens = sTrim.split(/\s+/);
+                let translatedTokens = [];
+                let tenseApplied = false;
+
+                for (let i = 0; i < tokens.length; i++) {
+                    let rawToken = tokens[i];
+                    let cleanToken = rawToken.replace(/[.,\/#!\?$\%\^&\*;:{}=\-_`~()]/g, "");
+                    let lowerToken = cleanToken.toLowerCase();
+                    let punct = rawToken.slice(cleanToken.length);
+
+                    if (lowerToken === 'will') continue;
+                    if (['the', 'a', 'an', 'to', 'do', 'does', 'did', 'are'].includes(lowerToken)) continue;
+
+                    if (lowerToken === "i'm" || lowerToken === "im") {
+                        translatedTokens.push("hon ni" + punct);
+                        log += `  + Contraction: "I'm" mapped to "hon ni" (I am)\n`;
+                        continue;
+                    }
+
+                    if (isProperNoun(cleanToken, i)) {
+                        translatedTokens.push(cleanToken + punct);
+                        log += `  + Name: "${cleanToken}" preserved\n`;
+                        continue;
+                    }
+
+                    // Universal Possessive Phrase Check ("my/your [word]" -> "[word] no hon/vi")
+                    if (possessives[lowerToken] && i + 1 < tokens.length) {
+                        let nextRaw = tokens[i+1];
+                        let nextClean = nextRaw.replace(/[.,\/#!\?$\%\^&\*;:{}=\-_`~()]/g, "");
+                        let nextPunct = nextRaw.slice(nextClean.length);
+                        let nextLemma = getLemma(nextClean);
+                        
+                        let isVerb = ['help', 'helping', 'track', 'cut', 'strike', 'bind', 'change', 'shift', 'exist', 'speak', 'dance', 'craft', 'make', 'fight', 'glow', 'resonate', 'thank', 'delete', 'grind', 'shout', 'wail', 'scream', 'echo', 'clash', 'turn', 'turns', 'fuels', 'fuel', 'grow', 'grows', 'rising', 'rise', 'embrace', 'keep', 'discerneb', 'discern', 'fuels', 'defy', 'defies', 'rising', 'see', 'look', 'find', 'fear', 'fears', 'love', 'loves', 'execute', 'contain', 'rule', 'rules', 'force', 'might', 'connect', 'think', 'know', 'dream', 'dreams', 'wish', 'wishes', 'build', 'flow', 'flows', 'deliver', 'deed', 'make', 'makes', 'create', 'creates', 'destroy', 'destroys', 'execute', 'executes', 'rewrote', 'rewrite', 'crossed', 'cross', 'lost', 'lose', 'stay', 'stayed', 'ask', 'asked', 'spin', 'spinning', 'weave', 'weaving', 'dress', 'clothing', 'can', 'could'].includes(nextLemma);
+                        
+                        let nextRoot = roots[nextLemma] || getSemanticFallback(nextLemma, isVerb);
+
+                        let translatedNoun = '';
+                        if (isVerb) {
+                            let lastCharRoot = nextRoot.charAt(nextRoot.length - 1);
+                            let bridge = '';
+                            if (isConsonant(lastCharRoot)) {
+                                bridge = currentDialect === 'vryeich' ? 'u' : 'e';
+                            }
+                            let suffix = currentDialect === 'vryeich' ? 'mu' : 'mi';
+                            translatedNoun = `${nextRoot}${bridge}${suffix}`;
+                        } else {
+                            let suffix = currentDialect === 'vryeich' ? 'ak' : 'ai';
+                            translatedNoun = `${nextRoot}${suffix}`;
+                        }
+
+                        let possessiveTrans = `${translatedNoun} no ${possessives[lowerToken]}${nextPunct}`;
+                        translatedTokens.push(possessiveTrans);
+                        log += `  + Possessive: "${lowerToken} ${nextClean}" -> "${possessiveTrans}"\n`;
+                        i++;
+                        continue;
+                    }
+
+                    if (staticParticles[lowerToken]) {
+                        let particleTrans = staticParticles[lowerToken];
+                        translatedTokens.push(particleTrans + punct);
+                        log += `  + Linker: "${cleanToken}" -> "${particleTrans}"\n`;
+                        continue;
+                    }
+
+                    if (pronouns[lowerToken]) {
+                        let pronounTrans = pronouns[lowerToken];
+                        translatedTokens.push(pronounTrans + punct);
+                        log += `  + Pronoun: "${cleanToken}" -> "${pronounTrans}"\n`;
+                        continue;
+                    }
+
+                    let lemma = getLemma(lowerToken);
+                    let isVerb = ['help', 'helping', 'track', 'cut', 'strike', 'bind', 'change', 'shift', 'exist', 'speak', 'dance', 'craft', 'make', 'fight', 'glow', 'resonate', 'thank', 'thanks', 'deleted', 'delete', 'grind', 'grinding', 'shout', 'wail', 'scream', 'echo', 'clash', 'turn', 'turns', 'fuels', 'fuel', 'grow', 'grows', 'rising', 'rise', 'embrace', 'keep', 'keep', 'discerneb', 'discern', 'fuels', 'defy', 'defies', 'rising', 'recasing', 'recast', 'delivered', 'struggled', 'struggle', 'clashed', 'clash', 'shattered', 'scattered', 'keeps', 'worshipped', 'worship', 'see', 'look', 'find', 'fear', 'fears', 'love', 'loves', 'execute', 'contain', 'rule', 'rules', 'force', 'might', 'connect', 'think', 'know', 'dream', 'dreams', 'wish', 'wishes', 'build', 'flow', 'flows', 'deliver', 'deed', 'make', 'makes', 'create', 'creates', 'destroy', 'destroys', 'execute', 'executes', 'rewrote', 'rewrite', 'crossed', 'cross', 'lost', 'lose', 'stay', 'stayed', 'ask', 'asked', 'spin', 'spinning', 'weave', 'weaving', 'dress', 'clothing', 'can', 'could', 'bow'].includes(lemma);
+                    
+                    let root = roots[lemma];
+                    let wasFuzzyFallback = false;
+
+                    if (!root) {
+                        root = getSemanticFallback(lemma, isVerb);
+                        wasFuzzyFallback = true;
+                    }
+                    
+                    log += `  + Root: "${lowerToken}" -> "${root}" ${wasFuzzyFallback ? '(Fuzzy Fallback)' : ''}\n`;
+                    
+                    if (isVerb) {
+                        let lastCharRoot = root.charAt(root.length - 1);
+                        let verbTrans = '';
+                        let bridge = '';
+                        if (isConsonant(lastCharRoot)) {
+                            bridge = currentDialect === 'vryeich' ? 'u' : 'e';
+                        }
+                        let suffix = currentDialect === 'vryeich' ? 'mu' : 'mi';
+                        verbTrans = `${root}${bridge}${suffix}`;
+
+                        if (tenseMarker && !tenseApplied) {
+                            verbTrans = `${tenseMarker} ${verbTrans}`;
+                            tenseApplied = true;
+                        }
+
+                        translatedTokens.push(verbTrans + punct);
+                    } else {
+                        let suffix = currentDialect === 'vryeich' ? 'ak' : 'ai';
+                        let nounTrans = `${root}${suffix}`;
+                        translatedTokens.push(nounTrans + punct);
+                    }
+                }
+
+                // DIALECT RE-ARRANGING (SVO for Tsuzeri / Strict VSO for Vryeich)
+                let assembledSentence = '';
+                if (currentDialect === 'vryeich') {
+                    // Extract verb and place at front (Procedural VSO)
+                    let verbIndex = translatedTokens.findIndex(tok => tok.endsWith('mu') || tok.includes(' Ka ') || tok.includes(' Ro '));
+                    if (verbIndex > 0) {
+                        let verbTok = translatedTokens.splice(verbIndex, 1)[0];
+                        translatedTokens.unshift(verbTok);
+                        log += `  - Dialect Rule (Vryeich): Verb-Subject-Object syntactic shift applied.\n`;
+                    }
+                } else {
+                    log += `  - Dialect Rule (Tsuzeri): Mirrored Subject-Verb-Object rhythm maintained.\n`;
+                }
+
+                assembledSentence = translatedTokens.join(' ').trim();
+                assembledSentence = assembledSentence.charAt(0).toUpperCase() + assembledSentence.slice(1);
+                
+                translatedSentences.push(assembledSentence);
+            });
+
+            const finalParagraphResult = translatedSentences.join(' ');
+            outputDisplay.innerText = finalParagraphResult;
+            
+            log += `\n<span class="log-success">SUCCESS: Forward compilation completed.</span>`;
+            logConsole.innerHTML = log;
+        }
+
+        // PIPELINE 2: ARAK-NIM -> ENGLISH (REVERSE DE-COMPILER)
+        function translateReverse() {
+            const rawInput = document.getElementById('english-input').value.trim();
+            const outputDisplay = document.getElementById('output-display');
+            const logConsole = document.getElementById('console-log');
+
+            if (!rawInput) {
+                outputDisplay.innerText = '...';
+                logConsole.innerHTML = '[Arak-Nim Reverse Parser Active] Waiting for input...';
+                return;
+            }
+
+            let log = `[Arak-Nim Reverse Parser v3.1]\n`;
+            log += `> Mode: DE-COMPILING Arak-Nim -> English...\n\n`;
+
+            const sentences = rawInput.match(/[^.!?\n]+[.!?\n]*/g) || [rawInput];
+            let translatedSentences = [];
+
+            sentences.forEach((sentenceStr, sIdx) => {
+                let sTrim = sentenceStr.trim();
+                if (!sTrim) {
+                    translatedSentences.push("");
+                    return;
+                }
+
+                log += `--- Sentence [${sIdx + 1}]: "${sTrim}" ---\n`;
+
+                let tokens = sTrim.split(/\s+/);
+                let translatedTokens = [];
+                let isPast = false;
+                let isFuture = false;
+
+                for (let i = 0; i < tokens.length; i++) {
+                    let rawToken = tokens[i];
+                    let cleanToken = rawToken.replace(/[.,\/#!\?$\%\^&\*;:{}=\-_`~()]/g, "");
+                    let lowerToken = cleanToken.toLowerCase();
+                    let punct = rawToken.slice(cleanToken.length);
+
+                    if (lowerToken === 'ka') {
+                        isPast = true;
+                        log += `  + Tense Indicator: Past Tense mapped.\n`;
+                        continue;
+                    }
+                    if (lowerToken === 'ro') {
+                        isFuture = true;
+                        log += `  + Tense Indicator: Future Tense mapped.\n`;
+                        continue;
+                    }
+
+                    // Clean names/literals
+                    if (isProperNoun(cleanToken, i)) {
+                        translatedTokens.push(cleanToken + punct);
+                        continue;
+                    }
+
+                    // Linkers
+                    if (particlesInverse[lowerToken]) {
+                        translatedTokens.push(particlesInverse[lowerToken] + punct);
+                        log += `  + Linker parsed: "${cleanToken}" -> "${particlesInverse[lowerToken]}"\n`;
+                        continue;
+                    }
+
+                    // Pronouns
+                    if (pronounsInverse[lowerToken]) {
+                        translatedTokens.push(pronounsInverse[lowerToken] + punct);
+                        log += `  + Pronoun parsed: "${cleanToken}" -> "${pronounsInverse[lowerToken]}"\n`;
+                        continue;
+                    }
+
+                    // Extract Roots by suffix Stripping and match with Contextual Reverse Matrix
+                    let parsedWord = '';
+                    if (lowerToken.endsWith('ak') || lowerToken.endsWith('ai')) {
+                        // Noun deconstruction
+                        let rootVal = lowerToken.slice(0, -2);
+                        if (reverseMatrix[rootVal]) {
+                            parsedWord = reverseMatrix[rootVal].noun;
+                            log += `  + Noun parsed: "${cleanToken}" -> Root "${rootVal}" -> "${parsedWord}"\n`;
+                        }
+                    } else if (lowerToken.endsWith('umu') || lowerToken.endsWith('emi') || lowerToken.endsWith('emu') || lowerToken.endsWith('mi') || lowerToken.endsWith('mu')) {
+                        // Verb deconstruction
+                        let rootVal = lowerToken.replace(/umu$|emu$|emi$|mi$|mu$/, "");
+                        if (rootVal.endsWith('u') || rootVal.endsWith('e')) rootVal = rootVal.slice(0, -1);
+                        
+                        if (reverseMatrix[rootVal]) {
+                            parsedWord = reverseMatrix[rootVal].verb;
+                            if (isPast) {
+                                // Simple past conjugation for common words
+                                if (parsedWord === 'see') parsedWord = 'saw';
+                                else if (parsedWord === 'have') parsedWord = 'had';
+                                else if (parsedWord === 'make') parsedWord = 'made';
+                                else parsedWord += 'ed';
+                            } else if (isFuture) {
+                                parsedWord = 'will ' + parsedWord;
+                            }
+                            log += `  + Verb parsed: "${cleanToken}" -> Root "${rootVal}" -> "${parsedWord}"\n`;
+                        }
+                    }
+
+                    if (parsedWord) {
+                        translatedTokens.push(parsedWord + punct);
+                    } else {
+                        // Preserve untranslated literals
+                        translatedTokens.push(cleanToken + punct);
+                        log += `  ! Unknown parsed: preserving "${cleanToken}" literally.\n`;
+                    }
+                }
+
+                let assembledSentence = translatedTokens.join(' ').trim();
+                assembledSentence = assembledSentence.charAt(0).toUpperCase() + assembledSentence.slice(1);
+                translatedSentences.push(assembledSentence);
+            });
+
+            const finalParagraphResult = translatedSentences.join(' ');
+            outputDisplay.innerText = finalParagraphResult;
+            
+            log += `\n<span class="log-success">SUCCESS: Reverse de-compilation completed.</span>`;
+            logConsole.innerHTML = log;
+        }
+    </script>
+</body>
+</html>
